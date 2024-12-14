@@ -4,6 +4,7 @@ import inquirer from "inquirer";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
+import { simpleGit } from "simple-git";
 
 // Utility to log messages with consistent formatting
 const log = {
@@ -14,7 +15,7 @@ const log = {
 };
 
 // Function to create a folder
-function createFolder(location: string, projectName: string): void {
+function createFolder(location: string, projectName: string): string {
     const fullPath = path.join(location, projectName);
 
     if (fs.existsSync(fullPath)) {
@@ -26,6 +27,21 @@ function createFolder(location: string, projectName: string): void {
         } catch (error) {
             log.error(`Failed to create folder: ${(error as Error).message}`);
         }
+    }
+
+    return fullPath;
+}
+
+// Function to clone a repository
+async function cloneRepository(repoUrl: string, targetDir: string) {
+    const git = simpleGit();
+    try {
+        log.info(`Cloning repository from ${repoUrl} to ${targetDir}...`);
+        await git.clone(repoUrl, targetDir);
+        log.success(`Repository cloned successfully to: ${targetDir}`);
+    } catch (error) {
+        log.error(`Failed to clone repository: ${(error as Error).message}`);
+        throw error;
     }
 }
 
@@ -41,25 +57,25 @@ async function runCLI() {
                 type: "list",
                 name: "frontend",
                 message: "Select a frontend framework:",
-                choices: ["Vite React", "Next.js (TypeScript)", "Next.js (JavaScript)"],
+                choices: ["Next.js (TypeScript)"],
             },
             {
                 type: "list",
                 name: "backend",
                 message: "Select a backend framework:",
-                choices: ["Node.js", "Next.js"],
+                choices: ["Next.js"],
             },
             {
                 type: "list",
                 name: "database",
                 message: "Select a database:",
-                choices: ["Firebase", "MongoDB"],
+                choices: ["Firebase"],
             },
             {
                 type: "list",
                 name: "auth",
-                message: "Select auhtentication:",
-                choices: ["Firebase", "Clerk"],
+                message: "Select authentication:",
+                choices: ["Firebase"],
             },
             {
                 type: "input",
@@ -106,9 +122,12 @@ async function runCLI() {
             log.info("Initializing project setup. Please wait...");
 
             // Create the folder
-            createFolder(answers.location, answers.projectName);
+            const projectPath = createFolder(answers.location, answers.projectName);
 
-            // logic here
+            // Clone the repository
+            const repoUrl = "https://github.com/Fi-Nitex/next-firebase";
+            await cloneRepository(repoUrl, projectPath);
+
             log.success("Project setup completed successfully!");
         } else {
             log.warning("Setup canceled by the user.");
@@ -119,4 +138,4 @@ async function runCLI() {
 }
 
 // Run the CLI
-runCLI();
+runCLI().catch(err => log.error(`CLI execution failed: ${(err as Error).message}`));
