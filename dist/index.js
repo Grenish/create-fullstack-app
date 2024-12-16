@@ -1,129 +1,178 @@
 #!/usr/bin/env node
-import inquirer from "inquirer";
-import chalk from "chalk";
-import fs from "fs";
-import path from "path";
-import { simpleGit } from "simple-git";
-// Utility to log messages with consistent formatting
-const log = {
-    info: (message) => console.log(chalk.blueBright(`[INFO]: ${message}`)),
-    success: (message) => console.log(chalk.green(`[SUCCESS]: ${message}`)),
-    warning: (message) => console.log(chalk.yellow(`[WARNING]: ${message}`)),
-    error: (message) => console.log(chalk.red(`[ERROR]: ${message}`)),
-};
-// Function to create a folder
-function createFolder(location, projectName) {
-    const fullPath = path.join(location, projectName);
-    if (fs.existsSync(fullPath)) {
-        log.warning(`Directory already exists: ${fullPath}`);
+import chalk from 'chalk';
+import fs from 'fs';
+import path from 'path';
+import inquirer from 'inquirer';
+import { simpleGit } from 'simple-git';
+import { z } from 'zod';
+// Get project name from command line arguments
+const projectName = process.argv[2];
+// Configuration Types and Schemas
+const ConfigSchema = z.object({
+    frontend: z.enum(['Next.js (TypeScript)']),
+    backend: z.enum(['Next.js']),
+    database: z.enum(['Firebase']),
+    auth: z.enum(['Firebase']),
+    projectName: z.string().min(1, 'Project name cannot be empty'),
+    location: z.string().min(1, 'Location path cannot be empty')
+});
+// Enhanced Logging Utility
+class Logger {
+    static formatMessage(level, message) {
+        return message; // Simplified format without timestamp
     }
-    else {
+    static info(message) {
+        console.log(chalk.blue('ℹ ') + chalk.whiteBright(this.formatMessage('info', message)));
+    }
+    static success(message) {
+        console.log(chalk.green('✔ ') + chalk.whiteBright(this.formatMessage('success', message)));
+    }
+    static warning(message) {
+        console.log(chalk.yellow('⚠ ') + chalk.whiteBright(this.formatMessage('warning', message)));
+    }
+    static error(message) {
+        console.error(chalk.red('✖ ') + chalk.whiteBright(this.formatMessage('error', message)));
+    }
+}
+// Project Creation Utilities
+class ProjectSetup {
+    static createProjectFolder(location, projectName) {
+        const fullPath = path.resolve(location, projectName);
         try {
-            fs.mkdirSync(fullPath, { recursive: true });
-            log.success(`Folder created successfully at: ${fullPath}`);
+            if (fs.existsSync(fullPath)) {
+                Logger.warning(`Directory already exists: ${fullPath}`);
+            }
+            else {
+                fs.mkdirSync(fullPath, { recursive: true });
+                Logger.success(`Project folder created: ${fullPath}`);
+            }
+            return fullPath;
         }
         catch (error) {
-            log.error(`Failed to create folder: ${error.message}`);
+            Logger.error(`Failed to create project folder: ${error instanceof Error ? error.message : String(error)}`);
+            throw error;
         }
     }
-    return fullPath;
-}
-// Function to clone a repository
-async function cloneRepository(repoUrl, targetDir) {
-    const git = simpleGit();
-    try {
-        log.info(`Cloning repository from ${repoUrl} to ${targetDir}...`);
-        await git.clone(repoUrl, targetDir);
-        log.success(`Repository cloned successfully to: ${targetDir}`);
+    static async cloneRepository(repoUrl, targetDir) {
+        try {
+            // Show spinning animation while cloning
+            const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+            let i = 0;
+            const spinner = setInterval(() => {
+                process.stdout.write(`\r${chalk.blue(frames[i])} Creating your project...`);
+                i = (i + 1) % frames.length;
+            }, 80);
+            const git = simpleGit();
+            await git.clone(repoUrl, targetDir);
+            // Clear spinner and show success message
+            clearInterval(spinner);
+            process.stdout.write('\r'); // Clear the current line
+            Logger.success(`Project created successfully: ${path.basename(targetDir)}`);
+        }
+        catch (error) {
+            Logger.error(`Repository cloning failed: ${error instanceof Error ? error.message : String(error)}`);
+            throw error;
+        }
     }
-    catch (error) {
-        log.error(`Failed to clone repository: ${error.message}`);
-        throw error;
-    }
 }
-// Main function
-async function runCLI() {
-    log.info("Welcome to the Full-Stack Project CLI Tool! 🚀");
-    log.info("This tool will guide you through setting up your project step by step.\n");
-    try {
-        // Step 1: User's preferences
+// CLI Interaction and Main Workflow
+class ProjectCLI {
+    static async getProjectConfiguration() {
+        // If no project name is provided via CLI
+        if (!projectName) {
+            Logger.error('Please provide a project name: npx create-fullstack-app <project-name>');
+            process.exit(1);
+        }
         const answers = await inquirer.prompt([
             {
-                type: "list",
-                name: "frontend",
-                message: "Select a frontend framework:",
-                choices: ["Next.js (TypeScript)"],
+                type: 'list',
+                name: 'frontend',
+                message: 'Select frontend framework:',
+                choices: ['Next.js (TypeScript)']
             },
             {
-                type: "list",
-                name: "backend",
-                message: "Select a backend framework:",
-                choices: ["Next.js"],
+                type: 'list',
+                name: 'backend',
+                message: 'Select backend framework:',
+                choices: ['Next.js']
             },
             {
-                type: "list",
-                name: "database",
-                message: "Select a database:",
-                choices: ["Firebase"],
+                type: 'list',
+                name: 'database',
+                message: 'Select database:',
+                choices: ['Firebase']
             },
             {
-                type: "list",
-                name: "auth",
-                message: "Select authentication:",
-                choices: ["Firebase"],
+                type: 'list',
+                name: 'auth',
+                message: 'Select authentication:',
+                choices: ['Firebase']
             },
             {
-                type: "input",
-                name: "projectName",
-                message: "Enter the directory name for your project:",
-                validate: (input) => input.trim().length > 0
-                    ? true
-                    : "Directory name cannot be empty. Please provide a valid name.",
-            },
-            {
-                type: "input",
-                name: "location",
-                message: "Specify the location path where the project will be created:",
-                validate: (input) => input.trim().length > 0
-                    ? true
-                    : "Location path cannot be empty. Please provide a valid path.",
-            },
+                type: 'input',
+                name: 'location',
+                message: 'Specify project location path:',
+                default: process.cwd(),
+                validate: (input) => input.trim().length > 0 || 'Location path cannot be empty'
+            }
         ]);
-        // Summary
-        console.log("\n" + chalk.bold("Summary of your choices:"));
-        log.success(`Frontend Framework: ${answers.frontend}`);
-        log.success(`Backend Framework: ${answers.backend}`);
-        log.success(`Database: ${answers.database}`);
-        log.success(`Authentication: ${answers.auth}`);
-        log.success(`Project Name: ${answers.projectName}`);
-        log.success(`Location Path: ${answers.location}`);
-        console.log();
-        // Confirmation
-        const { confirmSetup } = await inquirer.prompt([
-            {
-                type: "confirm",
-                name: "confirmSetup",
-                message: "Do you want to proceed with these settings?",
-                default: true,
-            },
-        ]);
-        // User confirmation
-        if (confirmSetup) {
-            log.info("Initializing project setup. Please wait...");
-            // Create the folder
-            const projectPath = createFolder(answers.location, answers.projectName);
-            // Clone the repository
-            const repoUrl = "https://github.com/Fi-Nitex/next-firebase";
-            await cloneRepository(repoUrl, projectPath);
-            log.success("Project setup completed successfully!");
+        const config = {
+            ...answers,
+            projectName: projectName
+        };
+        try {
+            return ConfigSchema.parse(config);
         }
-        else {
-            log.warning("Setup canceled by the user.");
+        catch (error) {
+            Logger.error('Invalid project configuration');
+            throw error;
         }
     }
-    catch (err) {
-        log.error(`An unexpected error occurred: ${err.message}`);
+    static displayConfigSummary(config) {
+        console.log(chalk.bold('\n📋 Project Configuration Summary'));
+        console.log(chalk.gray('─'.repeat(40)));
+        Object.entries(config).forEach(([key, value]) => {
+            const formattedKey = key.charAt(0).toUpperCase() + key.slice(1);
+            console.log(chalk.blue(`${formattedKey}:`), chalk.white(value));
+        });
+        console.log(chalk.gray('─'.repeat(40)) + '\n');
+    }
+    static async run() {
+        try {
+            Logger.info('Welcome to the Full-Stack Project CLI Tool! 🚀');
+            const config = await this.getProjectConfiguration();
+            this.displayConfigSummary(config);
+            const { confirmSetup } = await inquirer.prompt([{
+                    type: 'confirm',
+                    name: 'confirmSetup',
+                    message: 'Proceed with these settings?',
+                    default: true
+                }]);
+            if (!confirmSetup) {
+                Logger.warning('Project setup canceled by user.');
+                return;
+            }
+            const projectPath = ProjectSetup.createProjectFolder(config.location, config.projectName);
+            const repoUrl = 'https://github.com/Fi-Nitex/next-firebase';
+            await ProjectSetup.cloneRepository(repoUrl, projectPath);
+            console.log(`
+${chalk.green('✨ Project successfully initialized!')}
+${chalk.bold('\n📝 Next Steps:')}
+${chalk.gray('─'.repeat(40))}
+${chalk.blue('1.')} Navigate to project:     ${chalk.white(`cd ${path.basename(projectPath)}`)}
+${chalk.blue('2.')} Install dependencies:    ${chalk.white('bun install')}
+${chalk.blue('3.')} Start development:       ${chalk.white('bun run dev')}
+${chalk.gray('─'.repeat(40))}
+`);
+        }
+        catch (error) {
+            Logger.error(`Setup failed: ${error instanceof Error ? error.message : String(error)}`);
+            process.exit(1);
+        }
     }
 }
-// Run the CLI
-runCLI().catch(err => log.error(`CLI execution failed: ${err.message}`));
+// Execute CLI
+ProjectCLI.run().catch(error => {
+    Logger.error(`Unexpected error: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+});
