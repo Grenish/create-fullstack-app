@@ -22,10 +22,10 @@ const ConfigSchema = z.object({
 
 type ProjectConfig = z.infer<typeof ConfigSchema>;
 
-// Enhanced Logging Utility
+// Logging Utility
 class Logger {
     private static formatMessage(level: string, message: string): string {
-        return message;  // Simplified format without timestamp
+        return message;
     }
 
     static info(message: string): void {
@@ -67,7 +67,7 @@ class ProjectSetup {
 
     static async cloneRepository(repoUrl: string, targetDir: string): Promise<void> {
         try {
-            // Show spinning animation while cloning
+            // Spinning animation while cloning
             const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
             let i = 0;
 
