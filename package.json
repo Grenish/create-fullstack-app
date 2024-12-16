@@ -22,7 +22,7 @@
     "database"
   ],
   "bin": {
-    "fullstack-app": "./dist/index.js"
+    "create-fullstack-app": "./dist/index.js"
   },
   "author": "Grenish Rai",
   "license": "MIT",
@@ -32,9 +32,12 @@
   "homepage": "https://github.com/Grenish/fullstack-app-cli#readme",
   "dependencies": {
     "chalk": "^5.3.0",
+    "figlet": "^1.8.0",
+    "gradient-string": "^3.0.0",
     "inquirer": "^12.2.0",
     "simple-git": "^3.27.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2"
