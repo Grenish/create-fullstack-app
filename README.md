@@ -54,67 +54,46 @@ Automatically generate a `README.md` file tailored to your project, including:
 
 ---
 
-## Usage
-
-The CLI simplifies the creation of full-stack applications by allowing you to specify your stack components via command-line arguments.
-
-### Installation
-```bash
-npm install -g create-fullstack-app
-```
-
-### Command Syntax
-```bash
-create-fullstack-app -frontend [framework] -backend [framework] -styling [T/F] -database [database] -auth [auth-method] -dotenv [T/F]
-```
-
-#### Options
-- `-frontend`: Choose your front-end framework (e.g., React.js, Next.js)
-- `-backend`: Choose your back-end framework (Node.js with Express)
-- `-styling`: Enable TailwindCSS (`T`) or opt for traditional CSS (`F`)
-- `-database`: Select your database (e.g., Firebase, MongoDB)
-- `-auth`: Choose an authentication method (e.g., Clerk, NextAuth, OAuth)
-- `-dotenv`: Enable `.env` file support (`T/F`)
-
-### Example
-```bash
-create-fullstack-app -frontend nextjs -backend nodejs -styling=T -database=mongodb -auth=clerk -dotenv=T
-```
-
-### Output
-The command above generates a Next.js + Node.js application with:
-- TailwindCSS enabled for styling
-- MongoDB integration
-- Clerk for authentication
-- Environment variables managed via `.env` files
+Here's the updated **Usage** section reflecting the changes from `cliNew`:
 
 ---
 
-## Generated Project Structure
+## Usage
 
-An example project generated with Next.js + Node.js + MongoDB + TailwindCSS:
+The CLI simplifies the creation of full-stack applications by guiding you through interactive prompts to specify your stack components.
 
+### Command Syntax
+```bash
+npx create-fullstack-app <project-name>
 ```
-my-app/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   └── app.js
-│   ├── package.json
-│   └── .env.example
-├── frontend/
-│   ├── components/
-│   ├── pages/
-│   ├── styles/
-│   ├── public/
-│   ├── package.json
-│   └── .env.example
-├── README.md
-└── .gitignore
+
+### Example
+```bash
+npx create-fullstack-app my-next-app
+```
+
+### Interactive Setup
+Once you run the command, the CLI will prompt you to configure your project step-by-step:
+1. **Select Front-End Framework**: Next.js (TypeScript)
+2. **Select Back-End Framework**: Next.js
+3. **Select Database**: Firebase
+4. **Select Authentication**: Firebase
+5. **Specify Project Location**: Default is the current working directory (CWD)
+
+### Output
+The command above generates a project with:
+- Next.js (TypeScript) for both frontend and backend.
+- Firebase for database and authentication.
+- Pre-configured boilerplate code.
+
+---
+
+### Post-Setup Instructions
+After project creation, the CLI provides detailed next steps:
+```bash
+cd my-next-app       # Navigate to your project
+bun install          # Install dependencies
+bun run dev          # Start the development server
 ```
 
 ---
@@ -134,4 +113,4 @@ Scaffold CI/CD pipelines for seamless deployments using GitHub Actions or GitLab
 
 Kickstart your next project with **fullstack-app-cli** and experience the ease of rapid, streamlined full-stack application development!
 
-Last Updated : 01 Dec 2024
+Last Updated : 17 Dec 2024
