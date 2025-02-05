@@ -16,10 +16,10 @@ const ConfigSchema = z.object({
     projectName: z.string().min(1, 'Project name cannot be empty'),
     location: z.string().min(1, 'Location path cannot be empty')
 });
-// Enhanced Logging Utility
+// Logging Utility
 class Logger {
     static formatMessage(level, message) {
-        return message; // Simplified format without timestamp
+        return message;
     }
     static info(message) {
         console.log(chalk.blue('ℹ ') + chalk.whiteBright(this.formatMessage('info', message)));
@@ -55,7 +55,7 @@ class ProjectSetup {
     }
     static async cloneRepository(repoUrl, targetDir) {
         try {
-            // Show spinning animation while cloning
+            // Spinning animation while cloning
             const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
             let i = 0;
             const spinner = setInterval(() => {
@@ -161,7 +161,7 @@ ${chalk.bold('\n📝 Next Steps:')}
 ${chalk.gray('─'.repeat(40))}
 ${chalk.blue('1.')} Navigate to project:     ${chalk.white(`cd ${path.basename(projectPath)}`)}
 ${chalk.blue('2.')} Install dependencies:    ${chalk.white('bun install')}
-${chalk.blue('3.')} Start development:       ${chalk.white('bun run dev')}
+${chalk.blue('3.')} Start development:       ${chalk.white('bun dev')}
 ${chalk.gray('─'.repeat(40))}
 `);
         }
