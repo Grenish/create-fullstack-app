@@ -186,7 +186,7 @@ ${chalk.bold('\n📝 Next Steps:')}
 ${chalk.gray('─'.repeat(40))}
 ${chalk.blue('1.')} Navigate to project:     ${chalk.white(`cd ${path.basename(projectPath)}`)}
 ${chalk.blue('2.')} Install dependencies:    ${chalk.white('bun install')}
-${chalk.blue('3.')} Start development:       ${chalk.white('bun run dev')}
+${chalk.blue('3.')} Start development:       ${chalk.white('bun dev')}
 ${chalk.gray('─'.repeat(40))}
 `);
 
