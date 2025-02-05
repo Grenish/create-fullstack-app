@@ -1,6 +1,6 @@
 {
   "name": "fullstack-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A full stack CLI app, that will help you quick start with building fullstack applications.",
   "main": "index.ts",
   "type": "module",
@@ -25,6 +25,9 @@
   "bin": {
     "create-fullstack-app": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "author": "Grenish Rai",
   "license": "MIT",
   "bugs": {
