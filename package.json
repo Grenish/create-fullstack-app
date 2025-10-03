@@ -1,5 +1,5 @@
 {
-  "name": "fullstack-app",
+  "name": "create-fullstack-app",
   "version": "1.0.1",
   "description": "A full stack CLI app, that will help you quick start with building fullstack applications.",
   "main": "index.ts",
